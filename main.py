@@ -13,6 +13,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
 from reportlab.lib import colors
 import PyPDF2
+import pdfplumber
 
 app = FastAPI(
     title="PDF ↔ Excel Converter API",
@@ -77,34 +78,92 @@ async def pdf_to_excel(file: UploadFile = File(...)):
         with open(temp_pdf, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
         
-        # Convert PDF to Excel using tabula (for tables in PDF)
+        # First, try to extract tables using tabula
+        tables = None
         try:
-            # Try to extract tables from PDF
-            tables = tabula.read_pdf(str(temp_pdf), pages='all', multiple_tables=True)
-            
-            if not tables:
-                raise HTTPException(status_code=400, detail="No tables found in PDF")
-            
-            # Write to Excel with multiple sheets if multiple tables
+            tables = tabula.read_pdf(
+                str(temp_pdf), 
+                pages='all', 
+                multiple_tables=True,
+                silent=True
+            )
+            # Filter out empty tables
+            if tables:
+                tables = [t for t in tables if not t.empty]
+        except Exception:
+            pass
+        
+        # If tabula found tables, use them
+        if tables and len(tables) > 0:
             with pd.ExcelWriter(temp_excel, engine='openpyxl') as writer:
                 for i, table in enumerate(tables):
-                    sheet_name = f"Sheet{i+1}" if len(tables) > 1 else "Sheet1"
+                    sheet_name = f"Table_{i+1}" if len(tables) > 1 else "Sheet1"
                     table.to_excel(writer, sheet_name=sheet_name, index=False)
+        else:
+            # Otherwise, extract text content using pdfplumber
+            try:
+                with pdfplumber.open(temp_pdf) as pdf:
+                    all_data = []
+                    
+                    for page_num, page in enumerate(pdf.pages, 1):
+                        # Try to extract table first
+                        page_tables = page.extract_tables()
+                        
+                        if page_tables:
+                            # If tables found on this page, add them
+                            for table in page_tables:
+                                if table:
+                                    # Clean up table data
+                                    cleaned_table = [[cell if cell else '' for cell in row] for row in table]
+                                    df = pd.DataFrame(cleaned_table[1:], columns=cleaned_table[0] if cleaned_table else None)
+                                    all_data.append(('Table', df))
+                        else:
+                            # Otherwise extract text content
+                            text = page.extract_text()
+                            if text:
+                                lines = [line.strip() for line in text.split('\n') if line.strip()]
+                                if lines:
+                                    df = pd.DataFrame({'Content': lines})
+                                    all_data.append((f'Page_{page_num}', df))
+                    
+                    if not all_data:
+                        raise HTTPException(
+                            status_code=400, 
+                            detail="No content found in PDF. The PDF might be empty or contain only images."
+                        )
+                    
+                    # Write all data to Excel
+                    with pd.ExcelWriter(temp_excel, engine='openpyxl') as writer:
+                        for i, (name, df) in enumerate(all_data):
+                            sheet_name = name if len(all_data) == 1 else f"{name}_{i+1}"
+                            # Limit sheet name to 31 characters (Excel limitation)
+                            sheet_name = sheet_name[:31]
+                            df.to_excel(writer, sheet_name=sheet_name, index=False)
+                            
+            except HTTPException:
+                raise
+            except Exception as e:
+                raise HTTPException(
+                    status_code=500, 
+                    detail=f"Error extracting PDF content: {str(e)}"
+                )
+        
+        # Return the Excel file
+        return FileResponse(
+            path=temp_excel,
+            filename=f"{file.filename.rsplit('.', 1)[0]}.xlsx",
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
             
-            # Return the Excel file
-            return FileResponse(
-                path=temp_excel,
-                filename=f"{file.filename.rsplit('.', 1)[0]}.xlsx",
-                media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            )
-            
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Error converting PDF: {str(e)}")
-            
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error processing file: {str(e)}")
     finally:
         # Cleanup
         if temp_pdf.exists():
             temp_pdf.unlink()
+        # Keep temp_excel for download, will be cleaned up later
 
 
 @app.post("/excel-to-pdf")
