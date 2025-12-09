@@ -3,56 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign in - PDF Tools</title>
+    <title>Welcome Back - PDF Tools</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
-<body>
-    <div class="uber-login-container">
-        <div class="uber-login-box">
-            <div class="uber-header">
-                <h1>Sign in</h1>
+<body class="cred-body">
+    <div class="cred-gradient-bg"></div>
+    
+    <!-- Floating PDF Icons -->
+    <div class="floating-icons">
+        <div class="float-icon float-1">
+            <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="12" y="8" width="36" height="44" rx="3" fill="rgba(239, 68, 68, 0.2)" stroke="rgba(239, 68, 68, 0.4)" stroke-width="2"/>
+                <path d="M20 20H40M20 28H40M20 36H32" stroke="rgba(239, 68, 68, 0.6)" stroke-width="2" stroke-linecap="round"/>
+                <text x="24" y="48" font-size="8" fill="rgba(239, 68, 68, 0.8)" font-weight="700">PDF</text>
+            </svg>
+        </div>
+        <div class="float-icon float-2">
+            <svg width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="10" y="6" width="30" height="38" rx="2" fill="rgba(34, 197, 94, 0.2)" stroke="rgba(34, 197, 94, 0.4)" stroke-width="2"/>
+                <rect x="14" y="12" width="22" height="18" rx="1" stroke="rgba(34, 197, 94, 0.6)" stroke-width="1.5"/>
+                <line x="14" y="19" x2="36" y2="19" stroke="rgba(34, 197, 94, 0.6)" stroke-width="1.5"/>
+                <line x="22" y="12" x2="22" y2="30" stroke="rgba(34, 197, 94, 0.6)" stroke-width="1.5"/>
+            </svg>
+        </div>
+        <div class="float-icon float-3">
+            <svg width="55" height="55" viewBox="0 0 55 55" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 20L27.5 12L40 20M27.5 14V32" stroke="rgba(102, 126, 234, 0.5)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12 28V38C12 39.6569 13.3431 41 15 41H40C41.6569 41 43 39.6569 43 38V28" stroke="rgba(102, 126, 234, 0.5)" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+        </div>
+        <div class="float-icon float-4">
+            <svg width="45" height="45" viewBox="0 0 45 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="10" y="10" width="25" height="25" rx="2" fill="rgba(168, 85, 247, 0.2)" stroke="rgba(168, 85, 247, 0.4)" stroke-width="2"/>
+                <path d="M15 22.5L20 27.5L30 17.5" stroke="rgba(168, 85, 247, 0.8)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </div>
+        <div class="float-icon float-5">
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="20" cy="20" r="12" stroke="rgba(251, 191, 36, 0.5)" stroke-width="2" fill="rgba(251, 191, 36, 0.1)"/>
+                <path d="M20 14V20L24 22" stroke="rgba(251, 191, 36, 0.8)" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
+
+    <div class="cred-login-container">
+        <div class="cred-login-box">
+            <div class="cred-logo">
+                <div class="cred-logo-circle">
+                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="12" y="8" width="24" height="32" rx="2" fill="white" fill-opacity="0.2"/>
+                        <path d="M16 16H32M16 22H32M16 28H26" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                        <path d="M36 12L28 20" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                        <path d="M28 20H36V28" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="cred-header">
+                <h1 class="cred-title">welcome back.</h1>
+                <p class="cred-subtitle">enter your credentials to continue</p>
             </div>
 
             {% if error %}
-            <div class="uber-error">
-                {{ error }}
+            <div class="cred-error">
+                <span>⚠️</span> {{ error }}
             </div>
             {% endif %}
 
-            <form class="uber-form" method="POST" action="/login">
-                <div class="uber-input-group">
+            <form class="cred-form" method="POST" action="/login">
+                <div class="cred-input-wrapper">
+                    <label class="cred-label">USERNAME</label>
                     <input 
                         type="text" 
                         id="username" 
                         name="username" 
-                        placeholder="Enter username" 
+                        placeholder="enter username" 
                         required
                         autofocus
-                        class="uber-input"
+                        class="cred-input"
                     >
                 </div>
 
-                <div class="uber-input-group">
+                <div class="cred-input-wrapper">
+                    <label class="cred-label">PASSWORD</label>
                     <input 
                         type="password" 
                         id="password" 
                         name="password" 
-                        placeholder="Enter password" 
+                        placeholder="enter password" 
                         required
-                        class="uber-input"
+                        class="cred-input"
                     >
                 </div>
 
-                <button type="submit" class="uber-btn">
-                    Continue
+                <button type="submit" class="cred-btn">
+                    <span>continue</span>
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7 3L14 10L7 17" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
                 </button>
             </form>
 
-            <div class="uber-footer">
-                <div class="uber-divider">
-                    <span>Demo Credentials</span>
+            <div class="cred-footer">
+                <div class="cred-demo-badge">
+                    <span class="cred-badge-icon">🎯</span>
+                    <div>
+                        <div class="cred-demo-title">Demo Access</div>
+                        <div class="cred-demo-text">admin / admin123</div>
+                    </div>
                 </div>
-                <p class="uber-hint">Username: <strong>admin</strong> • Password: <strong>admin123</strong></p>
             </div>
         </div>
     </div>
