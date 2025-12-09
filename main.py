@@ -1,7 +1,8 @@
-from fastapi import FastAPI, File, UploadFile, HTTPException, Request
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, File, UploadFile, HTTPException, Request, Form, Depends
+from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from starlette.middleware.sessions import SessionMiddleware
 import os
 import tempfile
 import shutil
@@ -14,12 +15,18 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
 from reportlab.lib import colors
 import PyPDF2
 import pdfplumber
+import secrets
 
 app = FastAPI(
     title="PDF ↔ Excel Converter API",
     description="Convert PDF files to Excel and Excel files to PDF",
     version="1.0.0"
 )
+
+# Add session middleware with a consistent secret key
+# In production, use environment variable: os.getenv("SECRET_KEY", "your-secret-key-here")
+SECRET_KEY = "your-secret-key-change-this-in-production-12345678"
+app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
 
 # Mount static files and templates
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -29,11 +36,70 @@ templates = Jinja2Templates(directory="templates")
 TEMP_DIR = Path("/tmp/conversions")
 TEMP_DIR.mkdir(exist_ok=True)
 
+# Simple user database (case-insensitive username - all keys must be lowercase)
+USERS = {
+    "admin": "admin123",
+    "user": "password123",
+    "test": "test123"
+}
+
+
+def get_current_user(request: Request):
+    """Check if user is authenticated"""
+    user = request.session.get("user")
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    return user
+
+
+@app.get("/login")
+async def login_page(request: Request):
+    """Serve the login page"""
+    # If already logged in, redirect to home
+    if request.session.get("user"):
+        return RedirectResponse(url="/", status_code=302)
+    return templates.TemplateResponse("login.html", {"request": request})
+
+
+@app.post("/login")
+async def login(request: Request, username: str = Form(...), password: str = Form(...)):
+    """Handle login form submission"""
+    # Convert username to lowercase for case-insensitive comparison
+    username_lower = username.lower()
+    
+    # Debug logging
+    print(f"Login attempt - Username: '{username}', Username lower: '{username_lower}', Password: '{password}'")
+    print(f"Available users: {list(USERS.keys())}")
+    print(f"Username in USERS: {username_lower in USERS}")
+    if username_lower in USERS:
+        print(f"Expected password: '{USERS[username_lower]}', Got: '{password}', Match: {USERS[username_lower] == password}")
+    
+    # Check if username exists (case-insensitive) and password matches
+    if username_lower in USERS and USERS[username_lower] == password:
+        # Store the original username in session
+        request.session["user"] = username
+        print(f"Login successful! Redirecting to /")
+        return RedirectResponse(url="/", status_code=302)
+    
+    # Login failed
+    print(f"Login failed!")
+    return templates.TemplateResponse(
+        "login.html", 
+        {"request": request, "error": "Invalid username or password"}
+    )
+
+
+@app.get("/logout")
+async def logout(request: Request):
+    """Handle logout"""
+    request.session.clear()
+    return RedirectResponse(url="/login", status_code=302)
+
 
 @app.get("/")
-async def home(request: Request):
-    """Serve the main web interface"""
-    return templates.TemplateResponse("index.html", {"request": request})
+async def home(request: Request, user: str = Depends(get_current_user)):
+    """Serve the main web interface (protected)"""
+    return templates.TemplateResponse("index.html", {"request": request, "user": user})
 
 
 @app.get("/api")
@@ -56,9 +122,9 @@ async def health_check():
 
 
 @app.post("/pdf-to-excel")
-async def pdf_to_excel(file: UploadFile = File(...)):
+async def pdf_to_excel(request: Request, file: UploadFile = File(...), user: str = Depends(get_current_user)):
     """
-    Convert PDF file to Excel format
+    Convert PDF file to Excel format (protected)
     
     Args:
         file: PDF file to convert
@@ -167,9 +233,9 @@ async def pdf_to_excel(file: UploadFile = File(...)):
 
 
 @app.post("/excel-to-pdf")
-async def excel_to_pdf(file: UploadFile = File(...)):
+async def excel_to_pdf(request: Request, file: UploadFile = File(...), user: str = Depends(get_current_user)):
     """
-    Convert Excel file to PDF format
+    Convert Excel file to PDF format (protected)
     
     Args:
         file: Excel file to convert

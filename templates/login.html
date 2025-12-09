@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign in - PDF Tools</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="uber-login-container">
+        <div class="uber-login-box">
+            <div class="uber-header">
+                <h1>Sign in</h1>
+            </div>
+
+            {% if error %}
+            <div class="uber-error">
+                {{ error }}
+            </div>
+            {% endif %}
+
+            <form class="uber-form" method="POST" action="/login">
+                <div class="uber-input-group">
+                    <input 
+                        type="text" 
+                        id="username" 
+                        name="username" 
+                        placeholder="Enter username" 
+                        required
+                        autofocus
+                        class="uber-input"
+                    >
+                </div>
+
+                <div class="uber-input-group">
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        placeholder="Enter password" 
+                        required
+                        class="uber-input"
+                    >
+                </div>
+
+                <button type="submit" class="uber-btn">
+                    Continue
+                </button>
+            </form>
+
+            <div class="uber-footer">
+                <div class="uber-divider">
+                    <span>Demo Credentials</span>
+                </div>
+                <p class="uber-hint">Username: <strong>admin</strong> • Password: <strong>admin123</strong></p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

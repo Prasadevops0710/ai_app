@@ -400,6 +400,155 @@ body {
     font-weight: 500;
 }
 
+/* Uber-Style Login Page */
+.uber-login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: #FFFFFF;
+}
+
+.uber-login-box {
+    width: 100%;
+    max-width: 400px;
+}
+
+.uber-header h1 {
+    font-size: 2.25rem;
+    font-weight: 500;
+    color: #000000;
+    margin-bottom: 2rem;
+    letter-spacing: -0.5px;
+}
+
+.uber-error {
+    background: #FEF2F2;
+    color: #DC2626;
+    padding: 0.875rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+    border: 1px solid #FEE2E2;
+}
+
+.uber-form {
+    margin-bottom: 2rem;
+}
+
+.uber-input-group {
+    margin-bottom: 1rem;
+}
+
+.uber-input {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1rem;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    background: #F9FAFB;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    color: #000000;
+}
+
+.uber-input:focus {
+    outline: none;
+    background: #FFFFFF;
+    border-color: #000000;
+}
+
+.uber-input::placeholder {
+    color: #9CA3AF;
+}
+
+.uber-btn {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #FFFFFF;
+    background: #000000;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 0.5rem;
+}
+
+.uber-btn:hover {
+    background: #333333;
+}
+
+.uber-btn:active {
+    transform: scale(0.98);
+}
+
+.uber-footer {
+    padding-top: 2rem;
+}
+
+.uber-divider {
+    position: relative;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.uber-divider::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 100%;
+    height: 1px;
+    background: #E5E7EB;
+}
+
+.uber-divider span {
+    position: relative;
+    background: #FFFFFF;
+    padding: 0 1rem;
+    font-size: 0.875rem;
+    color: #6B7280;
+    font-weight: 500;
+}
+
+.uber-hint {
+    text-align: center;
+    color: #6B7280;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.uber-hint strong {
+    color: #000000;
+    font-weight: 500;
+}
+
+/* Logout button in navbar */
+.navbar .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar .btn {
+    padding: 0.5rem 1.5rem;
+    font-size: 0.95rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .uber-login-container {
+        padding: 1.5rem;
+    }
+
+    .uber-header h1 {
+        font-size: 1.875rem;
+    }
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .hero h1 {
@@ -428,5 +577,13 @@ body {
 
     .result-actions .btn {
         width: 100%;
+    }
+
+    .login-card {
+        padding: 2rem;
+    }
+
+    .login-header h1 {
+        font-size: 1.75rem;
     }
 }
